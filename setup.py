@@ -9,14 +9,14 @@ else:
 
 setuptools.setup(
     name="proxiesdotcom",
-    version="0.0.2",
+    version="0.0.3",
     author="Kristof",
     description="proxiesdotcom",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/kkristof200/py_proxies_dot_com",
     packages=setuptools.find_packages(),
-    install_requires=["requests", "kcu", "ksimpleapi", "jsoncodable", "beautifulsoup4"],
+    install_requires=["ksimpleapi", "jsoncodable", "kcu", "requests", "beautifulsoup4"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
