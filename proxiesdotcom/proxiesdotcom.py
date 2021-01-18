@@ -132,15 +132,27 @@ class ProxiesDotCom(Api):
             return False
 
         return res.status_code == 302
-    
+
     def update_proxy_auth_settings(
         self,
         reference: str,
         proxy_name: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        authenticated_ips: Optional[List[str]] = None
+        authenticated_ips: Optional[List[str]] = None,
+        keep_unset_values: bool = True
     ) -> bool:
+        if keep_unset_values:
+            proxy = self.get_proxy(reference)
+
+            if not proxy:
+                if self.debug:
+                    print('Could not get proxy with reference: \'{}\''.format(reference))
+
+                return False
+        else:
+            proxy = None
+
         referer_url = 'https://www.proxies.com/proxy/{}'.format(reference)
         token_res = self._get_resp_with_token(referer_url)
 
@@ -149,13 +161,18 @@ class ProxiesDotCom(Api):
 
         _, token = token_res
 
+        if proxy and authenticated_ips:
+            for ip in proxy.authenticated_ips:
+                if ip not in authenticated_ips:
+                    authenticated_ips.append(ip)
+
         args = {
             '_method': 'PUT',
             '_token': token,
-            'proxyUser': username or '',
-            'proxyPass': password or '',
+            'proxyUser': username or proxy.username if proxy else '',
+            'proxyPass': password or proxy.password if proxy else '',
             'authIps': '\r\n'.join(authenticated_ips) if authenticated_ips else '',
-            'proxyName': proxy_name or ''
+            'proxyName': proxy_name or proxy.name if proxy else '',
         }
 
         parsed_args = '&'.join(['{}={}'.format(k, quote(v)) for k, v in args.items()])
